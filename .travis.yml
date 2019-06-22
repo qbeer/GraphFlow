@@ -43,4 +43,4 @@ before_install:
   - PATH=${PATH}:${PWD}
 script:
   - cd tests/ && g++ -std=c++11 -pthread test_SMP_theta_physics.cpp
-  - cd tests/ && nvcc -std=c++11 -o executable test_SMP_beta_gpu_multistreams.cu
+  - nvcc -std=c++11 -o executable test_SMP_beta_gpu_multistreams.cu
