@@ -93,11 +93,11 @@ int main(int argc, char **argv) {
 	for (int j = 0; j < nEpochs; ++j) {
 		for (int batch = 0; batch < 10; ++batch){
 			cout << "Init batches.\n";
-			DenseGraph** _graphs = new DenseGraph*[10];
-			double** _targets = new double*[10];
-			for(int ind = 0; ind < 10; ++ind){
-				_graphs[ind] = graphs[batch * 10 + ind];
-				_targets[ind] = targets[batch * 10 + ind];
+			DenseGraph** _graphs = new DenseGraph*[100];
+			double** _targets = new double*[100];
+			for(int ind = 0; ind < 100; ++ind){
+				_graphs[ind] = graphs[batch * 100 + ind];
+				_targets[ind] = targets[batch * 100 + ind];
 			}
 			cout << "Created batches!\n";
 			train_network.Threaded_BatchLearn(100, _graphs, _targets, learning_rate);
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 		}
 
 		double totalLoss = train_network.getLoss(nMolecules, graphs, targets);
-		cout << "Done epoch " << j + 1 << " / " << nEpochs << "\tLoss : " << totalLoss << endl;
+		cout << "Done epoch " << j + 1 << " / " << nEpochs << "\tAverage loss per molecule : " << totalLoss / nMolecules << endl;
 	}
 
 	// Save model to file
