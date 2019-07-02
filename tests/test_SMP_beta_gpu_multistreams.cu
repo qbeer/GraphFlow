@@ -28,7 +28,7 @@ const int nFeatures = 5;
 
 const int targetSize = 1461;
 
-const int nThreads = 16;
+const int nThreads = 2;
 
 const double learning_rate = 1e-4;
 const int nEpochs = 10;
@@ -86,6 +86,7 @@ int main(int argc, char **argv) {
 
 	cout << "Multi-threadings" << endl;
 	train_network.init_multi_threads(nThreads);
+	cout << "Initialized multi-threading.\n";
 
 
 	for (int j = 0; j < nEpochs; ++j) {
