@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
+#include <tuple>
 #include <array>
 #include <time.h>
 #include <sys/time.h>
@@ -28,7 +29,7 @@ const int nFeatures = 5;
 
 const int targetSize = 1461;
 
-const int nThreads = 2;
+const int nThreads = 1;
 
 const double learning_rate = 1e-4;
 const int nEpochs = 10;
@@ -84,9 +85,9 @@ int main(int argc, char **argv) {
 		targets[i] = molecule[i] -> target;
 	}
 
-	cout << "Multi-threadings" << endl;
-	train_network.init_multi_threads(nThreads);
-	cout << "Initialized multi-threading.\n";
+	//cout << "Multi-threadings" << endl;
+	//train_network.init_multi_threads(nThreads);
+	//cout << "Initialized multi-threading.\n";
 
 
 	for (int j = 0; j < nEpochs; ++j) {
@@ -99,12 +100,8 @@ int main(int argc, char **argv) {
 				_targets[ind] = targets[batch * (nMolecules % 1000) + ind];
 			}
 			cout << "Created batches!\n";
-			train_network.Threaded_BatchLearn(nMolecules % 1000, _graphs, _targets, learning_rate);
-			double totalLoss = 0.;
-			for(int ind = 0; ind < nMolecules; ++ind){
-				double loss = train_network.getLoss(nMolecules, graphs, targets[ind]);
-			totalLoss += loss;
-			}
+			pair<double, double> losses = train_network.BatchLearn(nMolecules % 1000, _graphs, _targets, learning_rate);
+			double totalLoss = losses.first;
 			cout << "Done epoch " << j + 1 << " / " << "Batch " << batch + 1 << " / " << nEpochs << "\tLoss : " << totalLoss << endl;
 		}
 
