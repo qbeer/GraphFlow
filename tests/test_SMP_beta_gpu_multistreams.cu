@@ -21,7 +21,7 @@
 
 using namespace std;
 
-const int max_nVertices = 25;
+const int max_nVertices = 29;
 const int nChanels = 4;
 const int nLevels = 5;
 const int nFeatures = 5;
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 				_graphs[ind] = graphs[batch * (nMolecules % 1000) + ind];
 				_targets[ind] = targets[batch * (nMolecules % 1000) + ind];
 			}
-			cout << "Created batches!"
+			cout << "Created batches!\n";
 			train_network.Threaded_BatchLearn(nMolecules % 1000, _graphs, _targets, learning_rate);
 			double totalLoss = 0.;
 			for(int ind = 0; ind < nMolecules; ++ind){
