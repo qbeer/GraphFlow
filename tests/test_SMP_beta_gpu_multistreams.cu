@@ -91,6 +91,7 @@ int main(int argc, char **argv) {
 
 	for (int j = 0; j < nEpochs; ++j) {
 		for (int batch = 0; batch < nMolecules % 1000; ++batch){
+			cout << "Init batches.\n";
 			DenseGraph** _graphs = new DenseGraph*[nMolecules % 1000];
 			double** _targets = new double*[nMolecules % 1000];
 			for(int ind = 0; ind < nMolecules % 1000; ++ind){
