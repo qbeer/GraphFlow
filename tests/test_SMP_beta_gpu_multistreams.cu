@@ -32,7 +32,7 @@ const int targetSize = 1461;
 const int nThreads = 5;
 
 const double learning_rate = 1e-4;
-const int nEpochs = 10;
+const int nEpochs = 1;
 
 string model_fn = "SMP_beta_gpu_multistreams.dat";
 
@@ -91,17 +91,17 @@ int main(int argc, char **argv) {
 
 
 	for (int j = 0; j < nEpochs; ++j) {
-		for (int batch = 0; batch < 500; ++batch){
+		for (int batch = 0; batch < 50; ++batch){
 			cout << "Init batches.\n";
-			DenseGraph** _graphs = new DenseGraph*[10];
-			double** _targets = new double*[10];
-			for(int ind = 0; ind < 10; ++ind){
-				_graphs[ind] = graphs[batch * 10 + ind];
-				_targets[ind] = targets[batch * 10 + ind];
+			DenseGraph** _graphs = new DenseGraph*[100];
+			double** _targets = new double*[100];
+			for(int ind = 0; ind < 100; ++ind){
+				_graphs[ind] = graphs[batch * 100 + ind];
+				_targets[ind] = targets[batch * 100 + ind];
 			}
 			cout << "Created batches!\n";
-			train_network.Threaded_BatchLearn(10, _graphs, _targets, learning_rate);
-			double totalLoss = train_network.getLoss(10, _graphs, _targets);
+			train_network.Threaded_BatchLearn(100, _graphs, _targets, learning_rate);
+			double totalLoss = train_network.getLoss(100, _graphs, _targets);
 			cout << "Done epoch " << j + 1 << "/" << nEpochs << " Batch " << batch + 1 << "\tLoss : " << totalLoss << "\n";
 		}
 
