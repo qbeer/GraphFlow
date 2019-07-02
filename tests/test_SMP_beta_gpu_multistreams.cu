@@ -29,7 +29,7 @@ const int nFeatures = 5;
 
 const int targetSize = 1461;
 
-const int nThreads = 1;
+const int nThreads = 5;
 
 const double learning_rate = 1e-4;
 const int nEpochs = 10;
@@ -85,28 +85,27 @@ int main(int argc, char **argv) {
 		targets[i] = molecule[i] -> target;
 	}
 
-	//cout << "Multi-threadings" << endl;
-	//train_network.init_multi_threads(nThreads);
-	//cout << "Initialized multi-threading.\n";
+	cout << "Multi-threadings" << endl;
+	train_network.init_multi_threads(nThreads);
+	cout << "Initialized multi-threading.\n";
 
 
 	for (int j = 0; j < nEpochs; ++j) {
-		for (int batch = 0; batch < nMolecules % 1000; ++batch){
+		for (int batch = 0; batch < 5; ++batch){
 			cout << "Init batches.\n";
-			DenseGraph** _graphs = new DenseGraph*[nMolecules % 1000];
-			double** _targets = new double*[nMolecules % 1000];
-			for(int ind = 0; ind < nMolecules % 1000; ++ind){
-				_graphs[ind] = graphs[batch * (nMolecules % 1000) + ind];
-				_targets[ind] = targets[batch * (nMolecules % 1000) + ind];
+			DenseGraph** _graphs = new DenseGraph*[5];
+			double** _targets = new double*[5];
+			for(int ind = 0; ind < 5; ++ind){
+				_graphs[ind] = graphs[batch * 5 + ind];
+				_targets[ind] = targets[batch * 5 + ind];
 			}
 			cout << "Created batches!\n";
-			pair<double, double> losses = train_network.BatchLearn(nMolecules % 1000, _graphs, _targets, learning_rate);
+			pair<double, double> losses = train_network.Threaded_BatchLearn(5, _graphs, _targets, learning_rate);
 			double totalLoss = losses.first;
-			cout << "Done epoch " << j + 1 << " / " << "Batch " << batch + 1 << " / " << nEpochs << "\tLoss : " << totalLoss << endl;
+			cout << "Done epoch " << j + 1 << "/" << nEpochs << " Batch " << batch + 1 << "\tLoss : " << totalLoss << " ";
 			cout << "Second loss (???) : " << losses.second << "\n";
 		}
 
-		//train_network.Threaded_Predict(nMolecules, graphs, predict);
 		double totalLoss = train_network.getLoss(nMolecules, graphs, targets);
 		cout << "Done epoch " << j + 1 << " / " << nEpochs << "\tLoss : " << totalLoss << endl;
 	}
