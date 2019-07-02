@@ -33,7 +33,7 @@ const int nThreads = 16;
 const double learning_rate = 1e-4;
 const int nEpochs = 10;
 
-string model_fn = "SMP_omega_gpu_multistreams.dat";
+string model_fn = "SMP_beta_gpu_multistreams.dat";
 
 SMP_beta_gpu_multistreams train_network(max_nVertices, nLevels, nChanels, nFeatures, true);
 SMP_beta_gpu_multistreams test_network(max_nVertices, nLevels, nChanels, nFeatures, true);
@@ -89,15 +89,15 @@ int main(int argc, char **argv) {
 
 
 	for (int j = 0; j < nEpochs; ++j) {
-		for (int batch = 0; batch < nMolecules % 100; ++batch){
-			DenseGraph** _graphs = new DenseGraph*[nMolecules % 100];
-			double** _targets = new double*[nMolecules % 100];
-			for(int ind = 0; ind < nMolecules % 100; ++ind){
-				_graphs[ind] = graphs[batch * (nMolecules % 100) + ind];
-				_targets[ind] = targets[batch * (nMolecules % 100) + ind];
+		for (int batch = 0; batch < nMolecules % 1000; ++batch){
+			DenseGraph** _graphs = new DenseGraph*[nMolecules % 1000];
+			double** _targets = new double*[nMolecules % 1000];
+			for(int ind = 0; ind < nMolecules % 1000; ++ind){
+				_graphs[ind] = graphs[batch * (nMolecules % 1000) + ind];
+				_targets[ind] = targets[batch * (nMolecules % 1000) + ind];
 			}
-			train_network.Threaded_BatchLearn(nMolecules % 100, _graphs, _targets, learning_rate);
-			train_network.Threaded_Predict(nMolecules, graphs, predict);
+			cout << "Created batches!"
+			train_network.Threaded_BatchLearn(nMolecules % 1000, _graphs, _targets, learning_rate);
 			double totalLoss = 0.;
 			for(int ind = 0; ind < nMolecules; ++ind){
 				double loss = train_network.getLoss(nMolecules, graphs, targets[ind]);
