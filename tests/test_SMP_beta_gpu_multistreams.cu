@@ -91,19 +91,18 @@ int main(int argc, char **argv) {
 
 
 	for (int j = 0; j < nEpochs; ++j) {
-		for (int batch = 0; batch < 5; ++batch){
+		for (int batch = 0; batch < 500; ++batch){
 			cout << "Init batches.\n";
-			DenseGraph** _graphs = new DenseGraph*[5];
-			double** _targets = new double*[5];
-			for(int ind = 0; ind < 5; ++ind){
-				_graphs[ind] = graphs[batch * 5 + ind];
-				_targets[ind] = targets[batch * 5 + ind];
+			DenseGraph** _graphs = new DenseGraph*[10];
+			double** _targets = new double*[10];
+			for(int ind = 0; ind < 10; ++ind){
+				_graphs[ind] = graphs[batch * 10 + ind];
+				_targets[ind] = targets[batch * 10 + ind];
 			}
 			cout << "Created batches!\n";
-			pair<double, double> losses = train_network.Threaded_BatchLearn(5, _graphs, _targets, learning_rate);
-			double totalLoss = losses.first;
-			cout << "Done epoch " << j + 1 << "/" << nEpochs << " Batch " << batch + 1 << "\tLoss : " << totalLoss << " ";
-			cout << "Second loss (???) : " << losses.second << "\n";
+			train_network.Threaded_BatchLearn(10, _graphs, _targets, learning_rate);
+			double totalLoss = train_network.getLoss(10, _graphs, _targets);
+			cout << "Done epoch " << j + 1 << "/" << nEpochs << " Batch " << batch + 1 << "\tLoss : " << totalLoss << "\n";
 		}
 
 		double totalLoss = train_network.getLoss(nMolecules, graphs, targets);
