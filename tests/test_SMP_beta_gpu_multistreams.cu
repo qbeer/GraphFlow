@@ -103,14 +103,11 @@ int main(int argc, char **argv) {
 			pair<double, double> losses = train_network.BatchLearn(nMolecules % 1000, _graphs, _targets, learning_rate);
 			double totalLoss = losses.first;
 			cout << "Done epoch " << j + 1 << " / " << "Batch " << batch + 1 << " / " << nEpochs << "\tLoss : " << totalLoss << endl;
+			cout << "Second loss (???) : " << losses.second << "\n";
 		}
 
-		train_network.Threaded_Predict(nMolecules, graphs, predict);
-		double totalLoss = 0.;
-		for(int ind = 0; ind < nMolecules; ++ind){
-			double loss = train_network.getLoss(nMolecules, graphs, targets[ind]);
-			totalLoss += loss;
-		}
+		//train_network.Threaded_Predict(nMolecules, graphs, predict);
+		double totalLoss = train_network.getLoss(nMolecules, graphs, targets);
 		cout << "Done epoch " << j + 1 << " / " << nEpochs << "\tLoss : " << totalLoss << endl;
 	}
 
