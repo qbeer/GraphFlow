@@ -23,16 +23,16 @@
 using namespace std;
 
 const int max_nVertices = 29;
-const int nChanels = 4;
-const int nLevels = 5;
+const int nChanels = 5;
+const int nLevels = 4;
 const int nFeatures = 5;
 
 const int targetSize = 1461;
 
-const int nThreads = 8;
+const int nThreads = 12;
 
-const double learning_rate = 1e-4;
-const int nEpochs = 10;
+const double learning_rate = 5e-5;
+const int nEpochs = 50;
 
 string model_fn = "SMP_beta_gpu_multistreams.dat";
 
@@ -92,21 +92,19 @@ int main(int argc, char **argv) {
 
 	for (int j = 0; j < nEpochs; ++j) {
 		for (int batch = 0; batch < 10; ++batch){
-			cout << "Init batches.\n";
 			DenseGraph** _graphs = new DenseGraph*[100];
 			double** _targets = new double*[100];
 			for(int ind = 0; ind < 100; ++ind){
 				_graphs[ind] = graphs[batch * 100 + ind];
 				_targets[ind] = targets[batch * 100 + ind];
 			}
-			cout << "Created batches!\n";
 			train_network.Threaded_BatchLearn(100, _graphs, _targets, learning_rate);
 			double totalLoss = train_network.getLoss(100, _graphs, _targets);
-			cout << "Done epoch " << j + 1 << "/" << nEpochs << " Batch " << batch + 1 << "\tLoss : " << totalLoss << "\n";
+			cout << "Done epoch " << j + 1 << "/" << nEpochs << "  ||  Batch #" << batch + 1 << "\tLoss : " << totalLoss << "\n";
 		}
 
 		double totalLoss = train_network.getLoss(nMolecules, graphs, targets);
-		cout << "Done epoch " << j + 1 << " / " << nEpochs << "\tAverage loss per molecule : " << totalLoss / nMolecules << endl;
+		cout << "\tDone epoch " << j + 1 << " / " << nEpochs << "->\tAverage loss per molecule : " << totalLoss / nMolecules << endl;
 	}
 
 	// Save model to file
