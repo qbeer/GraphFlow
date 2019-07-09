@@ -137,7 +137,7 @@ void MoleculeBuilder::buildMolecules(std::vector<std::pair<std::string, std::str
                 adjecencyMatrix.push_back(adjecencyVec);
             }
 
-            std::vector<double> targets;
+            double target;
             while (!tar_infile.eof())
             {
                 std::string target;
@@ -146,25 +146,20 @@ void MoleculeBuilder::buildMolecules(std::vector<std::pair<std::string, std::str
                 double value;
                 while (iss >> value)
                 {
-                    targets.push_back(value);
+                    target = value;
                 }
             }
 
-            molecules[counter] = this->buildMolecule(adjecencyMatrix, labels, targets);
+            molecules[counter] = this->buildMolecule(adjecencyMatrix, labels, target);
         }
     }
 }
 
-Molecule *MoleculeBuilder::buildMolecule(std::vector<std::vector<double>> &adjecencyMatrix, std::vector<std::string> &labels, std::vector<double> &targets)
+Molecule *MoleculeBuilder::buildMolecule(std::vector<std::vector<double>> &adjecencyMatrix, std::vector<std::string> &labels, double target)
 {
     Molecule *molecule = new Molecule();
     molecule->graph = new DenseGraph(labels.size(), NUMBER_OF_FEATURES);
-    // TODO: update it with appropriate target
-    molecule->target = new double[targets.size()];
-    for (int i = 0; i < targets.size(); ++i)
-    {
-        molecule->target[i] = targets[i];
-    }
+    molecule->target = target;
 
     molecule->edge.clear();
     molecule->label.clear();

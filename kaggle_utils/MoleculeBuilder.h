@@ -21,5 +21,5 @@ private:
     std::vector<std::pair<std::string, std::string>> readMoleculesFromDir();
     void initMoleculesArray();
     void buildMolecules(std::vector<std::pair<std::string, std::string>> &filePaths);
-    Molecule *buildMolecule(std::vector<std::vector<double>> &adjecencyMatrix, std::vector<std::string> &labels, std::vector<double> &targets);
+    Molecule *buildMolecule(std::vector<std::vector<double>> &adjecencyMatrix, std::vector<std::string> &labels, double target);
 };

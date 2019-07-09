@@ -15,22 +15,27 @@ void Molecule::build()
         if (label[v] == "C")
         {
             graph->feature[v][0] = 1.0;
+            graph->coulomb[v][0] = 6.0;
         }
         if (label[v] == "H")
         {
             graph->feature[v][1] = 1.0;
+            graph->coulomb[v][1] = 1.0;
         }
         if (label[v] == "N")
         {
             graph->feature[v][2] = 1.0;
+            graph->feature[v][2] = 7.0;
         }
         if (label[v] == "O")
         {
             graph->feature[v][3] = 1.0;
+            graph->feature[v][3] = 8.0;
         }
         if (label[v] == "F")
         {
             graph->feature[v][4] = 1.0;
+            graph->feature[v][4] = 9.0;
         }
     }
 }

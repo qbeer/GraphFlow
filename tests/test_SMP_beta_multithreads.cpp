@@ -14,11 +14,15 @@
 #include <cstdlib>
 #include <vector>
 #include <time.h>
+#include <sys/time.h>
+#include <fstream>
 
-#include "../GraphFlow_32bit/SMP_beta.h"
+#include "../GraphFlow/SMP_beta.h"
+#include "../kaggle_utils/MoleculeBuilder.cpp"
 
 using namespace std;
 
+const bool useCoulomb = true;
 const int max_nVertices = 10;
 const int nChanels = 10;
 const int nLevels = 2;
@@ -30,145 +34,44 @@ const int nThreads = 4;
 const float learning_rate = 0.001;
 const int nEpochs = 1024;
 
-const int nMolecules = 4;
-
 string model_fn = "SMP_beta-model.dat";
 
-SMP_beta train_network(max_nVertices, nLevels, nChanels, nFeatures, nDepth);
-SMP_beta test_network(max_nVertices, nLevels, nChanels, nFeatures, nDepth);
+SMP_beta train_network(useCoulomb, max_nVertices, nLevels, nChanels, nFeatures, nDepth);
+SMP_beta test_network(useCoulomb, max_nVertices, nLevels, nChanels, nFeatures, nDepth);
 
-struct Molecule {
-	DenseGraph *graph;
-	float target;
-	vector< pair<int, int> > edge;
-	vector< string > label;
-
-	void build() {
-		for (int i = 0; i < edge.size(); ++i) {
-			int u = edge[i].first;
-			int v = edge[i].second;
-			graph -> adj[u][v] = 1;
-			graph -> adj[v][u] = 1;
-		}
-
-		for (int v = 0; v < graph -> nVertices; ++v) {
-			if (label[v] == "C") {
-				graph -> feature[v][0] = 1.0;
-			}
-			if (label[v] == "H") {
-				graph -> feature[v][1] = 1.0;
-			}
-			if (label[v] == "N") {
-				graph -> feature[v][2] = 1.0;
-			}
-			if (label[v] == "O") {
-				graph -> feature[v][3] = 1.0;
-			}
-		}
-	}
-};
-Molecule **molecule;
-
-void init(Molecule *mol, string name) {
-	if (name == "CH4") {
-		mol -> graph = new DenseGraph(5, nFeatures);
-		mol -> target = mol -> graph -> nVertices;
-
-		mol -> edge.clear();
-		mol -> edge.push_back(make_pair(0, 1));
-		mol -> edge.push_back(make_pair(0, 2));
-		mol -> edge.push_back(make_pair(0, 3));
-		mol -> edge.push_back(make_pair(0, 4));
-
-		mol -> label.clear();
-		mol -> label.push_back("C");
-		mol -> label.push_back("H");
-		mol -> label.push_back("H");
-		mol -> label.push_back("H");
-		mol -> label.push_back("H");
-
-		mol -> build();
-	}
-
-	if (name == "NH3") {
-		mol -> graph = new DenseGraph(4, nFeatures);
-		mol -> target = mol -> graph -> nVertices;
-
-		mol -> edge.clear();
-		mol -> edge.push_back(make_pair(0, 1));
-		mol -> edge.push_back(make_pair(0, 2));
-		mol -> edge.push_back(make_pair(0, 3));
-
-		mol -> label.clear();
-		mol -> label.push_back("N");
-		mol -> label.push_back("H");
-		mol -> label.push_back("H");
-		mol -> label.push_back("H");
-
-		mol -> build();
-	}
-
-	if (name == "H2O") {
-		mol -> graph = new DenseGraph(3, nFeatures);
-		mol -> target = mol -> graph -> nVertices;
-
-		mol -> edge.clear();
-		mol -> edge.push_back(make_pair(0, 1));
-		mol -> edge.push_back(make_pair(0, 2));
-
-		mol -> label.clear();
-		mol -> label.push_back("O");
-		mol -> label.push_back("H");
-		mol -> label.push_back("H");
-
-		mol -> build();
-	}
-
-	if (name == "C2H4") {
-		mol -> graph = new DenseGraph(6, nFeatures);
-		mol -> target = mol -> graph -> nVertices;
-
-		mol -> edge.clear();
-		mol -> edge.push_back(make_pair(0, 1));
-		mol -> edge.push_back(make_pair(0, 2));
-		mol -> edge.push_back(make_pair(0, 3));
-		mol -> edge.push_back(make_pair(3, 4));
-		mol -> edge.push_back(make_pair(3, 5));
-
-		mol -> label.clear();
-		mol -> label.push_back("C");
-		mol -> label.push_back("H");
-		mol -> label.push_back("H");
-		mol -> label.push_back("C");
-		mol -> label.push_back("H");
-		mol -> label.push_back("H");
-
-		mol -> build();
-	}
+// Get the millisecond
+void time_ms(long int &ms) {
+	struct timeval tp;
+	gettimeofday(&tp, NULL);
+	ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
 }
+
+// Difference in milliseconds
+long int difftime_ms(long int &end, long int &start) {
+	return end - start;
+}
+
+Molecule **molecule;
 
 int main(int argc, char **argv) {
 	// Measuring time
-	time_t start, end;
+	long int start, end;
+
+	cout << "Molecule builder init..." << std::endl;
+	MoleculeBuilder* moleculeBuilder = new MoleculeBuilder();
+
+	molecule = moleculeBuilder->getMolecules();
+	int nMolecules = moleculeBuilder->getNumberOfMolecules();
 
 	// Starting time
-	time(&start);
-
-	molecule = new Molecule* [nMolecules];
-	for (int i = 0; i < nMolecules; ++i) {
-		molecule[i] = new Molecule();
-	}
-
-	init(molecule[0], "CH4");
-	init(molecule[1], "NH3");
-	init(molecule[2], "H2O");
-	init(molecule[3], "C2H4");
+	time_ms(start);
 
 	cout << "--- Learning ------------------------------" << endl;
 
 	DenseGraph **graphs = new DenseGraph* [nMolecules];
-	float *targets = new float [nMolecules];
-	float *predict = new float [nMolecules];
+	
+	double* targets = new double[nMolecules];
+	double* predict = new double[nMolecules];
 
 	for (int i = 0; i < nMolecules; ++i) {
 		graphs[i] = molecule[i] -> graph;
@@ -177,18 +80,24 @@ int main(int argc, char **argv) {
 
 	cout << "Multi-threadings" << endl;
 	train_network.init_multi_threads(nThreads);
+	cout << "Initialized multi-threading.\n";
 
 
 	for (int j = 0; j < nEpochs; ++j) {
-		train_network.Threaded_BatchLearn(nMolecules, graphs, targets, learning_rate);
-		cout << "Done epoch " << j + 1 << " / " << nEpochs << endl;
-
-		train_network.Threaded_Predict(nMolecules, graphs, predict);
-		for (int i = 0; i < nMolecules; ++i) {
-			cout << "Molecule " << (i + 1) << ": ";
-			cout << "Target = " << targets[i] << ", Predict = " << predict[i] << endl;
+		for (int batch = 0; batch < 10; ++batch){
+			DenseGraph** _graphs = new DenseGraph*[100];
+			double* _targets = new double[100];
+			for(int ind = 0; ind < 100; ++ind){
+				_graphs[ind] = graphs[batch * 100 + ind];
+				_targets[ind] = targets[batch * 100 + ind];
+			}
+			train_network.Threaded_BatchLearn(100, _graphs, _targets, learning_rate);
+			double totalLoss = train_network.getLoss(100, _graphs, _targets);
+			cout << "Done epoch " << j + 1 << "/" << nEpochs << "  ||  Batch #" << batch + 1 << "\tLoss : " << totalLoss << "\n";
 		}
-		cout << endl;
+
+		double totalLoss = train_network.getLoss(nMolecules, graphs, targets);
+		cout << "\tDone epoch " << j + 1 << " / " << nEpochs << "->\tAverage loss per molecule : " << totalLoss / nMolecules << endl;
 	}
 
 	// Save model to file
@@ -200,17 +109,18 @@ int main(int argc, char **argv) {
 	test_network.load_model(model_fn);
 
 	for (int i = 0; i < nMolecules; ++i) {
-		cout << "Molecule " << (i + 1) << ": ";
-
-		float predict = test_network.Predict(molecule[i] -> graph);
-		
-		cout << "Target = " << molecule[i] -> target << ", Predict = " << predict << endl;
+		double predict = test_network.Predict(molecule[i] -> graph);
+		cout << "Molecule " << (i + 1) << "target : " << targets[i] << "\tprediction : " << predict <<"\n";
+		ofstream outfile("predictions/molecule_" + std::to_string(i + 1), std::ios::out);
+		outfile << predict;
+		outfile << "\n";
+		outfile.close();
 	}
 
 	// Ending time
-	time(&end);
+	time_ms(end);
 
-	cout << endl << difftime(end, start) << " seconds" << endl;
+	cout << endl << difftime_ms(end, start) << " ms" << endl;
 
 	return 0;
 }
