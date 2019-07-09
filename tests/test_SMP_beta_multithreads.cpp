@@ -23,16 +23,16 @@
 using namespace std;
 
 const bool useCoulomb = true;
-const int max_nVertices = 10;
+const int max_nVertices = 30;
 const int nChanels = 10;
 const int nLevels = 2;
-const int nFeatures = 4;
+const int nFeatures = 5;
 const int nDepth = 5;
 
-const int nThreads = 4;
+const int nThreads = 2;
 
 const float learning_rate = 0.001;
-const int nEpochs = 1024;
+const int nEpochs = 100;
 
 string model_fn = "SMP_beta-model.dat";
 
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 
 	for (int i = 0; i < nMolecules; ++i) {
 		double predict = test_network.Predict(molecule[i] -> graph);
-		cout << "Molecule " << (i + 1) << "target : " << targets[i] << "\tprediction : " << predict <<"\n";
+		cout << "Molecule " << (i + 1) << "\t\ttarget : " << targets[i] << "\tprediction : " << predict <<"\n";
 		ofstream outfile("predictions/molecule_" + std::to_string(i + 1), std::ios::out);
 		outfile << predict;
 		outfile << "\n";
