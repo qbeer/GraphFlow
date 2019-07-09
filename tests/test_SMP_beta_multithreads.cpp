@@ -29,10 +29,10 @@ const int nLevels = 2;
 const int nFeatures = 5;
 const int nDepth = 5;
 
-const int nThreads = 12;
+const int nThreads = 2;
 
-const float learning_rate = 0.01;
-const int nEpochs = 3;
+const float learning_rate = 0.001;
+const int nEpochs = 50;
 
 string model_fn = "SMP_beta-model.dat";
 
@@ -82,17 +82,18 @@ int main(int argc, char **argv) {
 	train_network.init_multi_threads(nThreads);
 	cout << "Initialized multi-threading.\n";
 
+	int BATCH_SIZE = 50;
 
 	for (int j = 0; j < nEpochs; ++j) {
-		for (int batch = 0; batch < 20; ++batch){
-			DenseGraph** _graphs = new DenseGraph*[50];
-			double* _targets = new double[50];
-			for(int ind = 0; ind < 50; ++ind){
-				_graphs[ind] = graphs[batch * 50 + ind];
-				_targets[ind] = targets[batch * 50 + ind];
+		for (int batch = 0; batch < 1000 / BATCH_SIZE; ++batch){
+			DenseGraph** _graphs = new DenseGraph*[BATCH_SIZE];
+			double* _targets = new double[BATCH_SIZE];
+			for(int ind = 0; ind < BATCH_SIZE; ++ind){
+				_graphs[ind] = graphs[batch * BATCH_SIZE + ind];
+				_targets[ind] = targets[batch * BATCH_SIZE + ind];
 			}
-			train_network.Threaded_BatchLearn(50, _graphs, _targets, learning_rate);
-			double totalLoss = train_network.getLoss(50, _graphs, _targets);
+			train_network.Threaded_BatchLearn(BATCH_SIZE, _graphs, _targets, learning_rate);
+			double totalLoss = train_network.getLoss(BATCH_SIZE, _graphs, _targets);
 			cout << "Done epoch " << j + 1 << "/" << nEpochs << "  ||  Batch #" << batch + 1 << "\tLoss : " << totalLoss << "\n";
 		}
 

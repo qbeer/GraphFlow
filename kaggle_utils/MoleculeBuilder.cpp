@@ -140,13 +140,10 @@ void MoleculeBuilder::buildMolecules(std::vector<std::pair<std::string, std::str
             double target;
             while (!tar_infile.eof())
             {
-                std::string target;
-                std::getline(tar_infile, target);
-                std::istringstream iss(target);
                 double value;
-                while (iss >> value)
+                while (tar_infile >> value)
                 {
-                    target = ( value + 410.87 ) / 39.83;
+                    target = value;
                 }
             }
 
