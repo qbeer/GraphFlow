@@ -46,7 +46,10 @@ public:
 	void forward() {
 		value[0] = 0.0;
 		for (int i = 0; i < predict -> size; ++i) {
-			value[0] += (predict -> value[i] - target -> value[i]) * (predict -> value[i] - target -> value[i]);
+			if (target -> value[i] > 0. || target -> value[i] < 0.){
+				value[0] += (predict -> value[i] - target -> value[i]) * (predict -> value[i] - target -> value[i]);
+			}
+
 		}
 		value[0] *= 0.5;
 
