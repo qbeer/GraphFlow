@@ -261,20 +261,28 @@ public:
 		shrinked = new ShrinkTensor* [max_nVertices];
 		vertex_feature = new LeakyReLU* [max_nVertices];
 
+		int nTotalFeatures = 0;
+
 		for (int v = 0; v < max_nVertices; ++v) {
 			shrinked[v] = new ShrinkTensor(nChanels);
 			vertex_feature[v] = new LeakyReLU(nChanels);
+			nTotalFeatures += nChanels;
 		}
 
-		graph_feature = new SumVectors(nChanels);
-		predict = new InnerProduct();
+		graph_feature = new ConcatVectors(nTotalFeatures);
+
+		int nHidden = 1461;
+		W1 = new Matrix(nHidden, nTotalFeatures);
+		W2 = new Vector(nHidden);
+
+		hidden = new MatVecMul(nHidden);
+		hidden_activation = new LeakyReLU(nHidden);
+
+		predict = new Multiply(hidden_activation, W2);
 		sql = new SquaredLoss();
 
-		// Linear regression
-		W = new Vector(nChanels);
-
 		// Target
-		target = new Vector(1);
+		target = new Vector(1461);
 
 		// +-------------------+
 		// | Computation graph |
@@ -292,7 +300,9 @@ public:
 			sgd -> add(level[l] -> K);
 			sgd -> add(level[l] -> b);
 		}
-		sgd -> add(W);
+		
+		sgd -> add(W1);
+		sgd -> add(W2);
 
 		// Sum gradients
 		sum_gradients = new SumGradients();
@@ -685,8 +695,14 @@ public:
 
 		graph -> add(graph_feature, SUMVECTORS);
 
-		predict -> setParameter(graph_feature, W);
-		graph -> add(predict, INNERPRODUCT);
+		// Fully-connected layers
+		hidden -> setParameter(W1, graph_feature);
+		graph -> add(hidden, MATVECMUL);
+
+		hidden_activation -> setParameter(hidden);
+		graph -> add(hidden_activation, LEAKYRELU);
+
+		graph -> add(predict, MULTIPLY);
 
 		sql -> setParameter(predict, target);
 		graph -> add(sql, SQUAREDLOSS);
@@ -1144,13 +1160,19 @@ public:
 	LeakyReLU **vertex_feature;
 
 	// Graph feature
-	SumVectors *graph_feature;
+	ConcatVectors *graph_feature;
 
 	// Linear Regression
 	Vector *W;
 
+	// Fully-connected layer
+	Matrix *W1;
+	Vector *W2;
+	MatVecMul *hidden;
+	LeakyReLU *hidden_activation;
+
 	// Prediction
-	InnerProduct *predict;
+	Multiply *predict;
 
 	// Target
 	Vector *target;
@@ -1230,6 +1252,10 @@ public:
 		delete[] shrinked;
 		delete[] vertex_feature;
 		delete graph_feature;
+		delete W1;
+		delete W2;
+		delete hidden;
+		delete hidden_activation;
 		delete W;
 		delete predict;
 		delete target;
