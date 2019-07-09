@@ -146,7 +146,7 @@ void MoleculeBuilder::buildMolecules(std::vector<std::pair<std::string, std::str
                 double value;
                 while (iss >> value)
                 {
-                    target = value;
+                    target = ( value + 410.87 ) / 39.83;
                 }
             }
 

@@ -29,10 +29,10 @@ const int nLevels = 2;
 const int nFeatures = 5;
 const int nDepth = 5;
 
-const int nThreads = 2;
+const int nThreads = 12;
 
 const float learning_rate = 0.01;
-const int nEpochs = 100;
+const int nEpochs = 3;
 
 string model_fn = "SMP_beta-model.dat";
 
@@ -84,15 +84,15 @@ int main(int argc, char **argv) {
 
 
 	for (int j = 0; j < nEpochs; ++j) {
-		for (int batch = 0; batch < 10; ++batch){
-			DenseGraph** _graphs = new DenseGraph*[100];
-			double* _targets = new double[100];
-			for(int ind = 0; ind < 100; ++ind){
-				_graphs[ind] = graphs[batch * 100 + ind];
-				_targets[ind] = targets[batch * 100 + ind];
+		for (int batch = 0; batch < 20; ++batch){
+			DenseGraph** _graphs = new DenseGraph*[50];
+			double* _targets = new double[50];
+			for(int ind = 0; ind < 50; ++ind){
+				_graphs[ind] = graphs[batch * 50 + ind];
+				_targets[ind] = targets[batch * 50 + ind];
 			}
-			train_network.Threaded_BatchLearn(100, _graphs, _targets, learning_rate);
-			double totalLoss = train_network.getLoss(100, _graphs, _targets);
+			train_network.Threaded_BatchLearn(50, _graphs, _targets, learning_rate);
+			double totalLoss = train_network.getLoss(50, _graphs, _targets);
 			cout << "Done epoch " << j + 1 << "/" << nEpochs << "  ||  Batch #" << batch + 1 << "\tLoss : " << totalLoss << "\n";
 		}
 
