@@ -121,11 +121,13 @@ public:
 		// Initialize all instances
 		instance = new SMP_omega* [this -> nThreads];
 		for (int i = 0; i < nThreads; ++i) {
+			cout << "instance created\n";
 			instance[i] = new SMP_omega(use_coulomb, max_nVertices, max_receptive_field, nLevels, nChanels, nFeatures, nDepth, has_WL_ordering);
 		}
 
 		// Initialize multi-threaded jobs
 		job = new std::thread [this -> nThreads];
+		cout << "initialized jobs\n";
 	}
 
 	// +-----------------------+
@@ -620,7 +622,9 @@ public:
 			graph -> add(level[l] -> K, MATRIX);
 			graph -> add(level[l] -> b, VECTOR);
 		}
-		graph -> add(W, VECTOR);
+
+		graph -> add(W1, MATRIX);
+		graph -> add(W2, VECTOR);
 
 		for (int l = 0; l <= nLevels; ++l) {
 			if (l == 0) {
@@ -736,6 +740,7 @@ public:
 	}
 
 	void clean_gradient(Adam *sgd) {
+		cout << "Cleaning grads.\n";
 		for (int i = 0; i < sgd -> params.size(); ++i) {
 			for (int v = 0; v < sgd -> params[i] -> size; ++v) {
 				sgd -> params[i] -> gradient[v] = 0.0;
@@ -759,6 +764,8 @@ public:
 		instance -> complete_computation_graph(molecule);
 		instance -> target -> value = target;
 
+		cout << "Compute gradient job initialized.\n";
+
 		instance -> graph -> forward();
 		instance -> graph -> backward();
 	}
@@ -767,13 +774,19 @@ public:
 		assert(multi_threaded == true);
 		assert(nThreads > 1);
 
+		cout << "Threaded batch learn!\n";
+
 		assert(nBatch > 0);
 		for (int i = 0; i < nBatch; ++i) {
 			assert(molecule[i] -> nVertices <= max_nVertices);
 			assert(molecule[i] -> nFeatures == nFeatures);
 		}
 
+		cout << "Clean gradient!\n";
+
 		clean_gradient(sgd);
+
+		cout << "Cleaned gradient!\n";
 
 		int start = 0;
 		while (start < nBatch) {
