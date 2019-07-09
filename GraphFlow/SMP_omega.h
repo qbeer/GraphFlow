@@ -263,18 +263,16 @@ public:
 		shrinked = new ShrinkTensor* [max_nVertices];
 		vertex_feature = new LeakyReLU* [max_nVertices];
 
-		int nTotalFeatures = 0;
-
 		for (int v = 0; v < max_nVertices; ++v) {
 			shrinked[v] = new ShrinkTensor(nChanels);
 			vertex_feature[v] = new LeakyReLU(nChanels);
-			nTotalFeatures += nChanels;
+
 		}
 
-		graph_feature = new ConcatVectors(nTotalFeatures);
+		graph_feature = new SumVectors(nChanels);
 
 		int nHidden = 1461;
-		W1 = new Matrix(nHidden, nTotalFeatures);
+		W1 = new Matrix(nHidden, nChanels);
 		W2 = new Vector(nHidden);
 
 		hidden = new MatVecMul(nHidden);
@@ -697,7 +695,7 @@ public:
 			graph_feature -> add_vector(vertex_feature[v]);
 		}
 
-		graph -> add(graph_feature, CONCATVECTORS);
+		graph -> add(graph_feature, SUMVECTORS);
 
 		// Fully-connected layers
 		hidden -> setParameter(W1, graph_feature);
@@ -1173,7 +1171,7 @@ public:
 	LeakyReLU **vertex_feature;
 
 	// Graph feature
-	ConcatVectors *graph_feature;
+	SumVectors *graph_feature;
 
 	// Linear Regression
 	Vector *W;
