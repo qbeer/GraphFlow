@@ -697,7 +697,7 @@ public:
 			graph_feature -> add_vector(vertex_feature[v]);
 		}
 
-		graph -> add(graph_feature, SUMVECTORS);
+		graph -> add(graph_feature, CONCATVECTORS);
 
 		// Fully-connected layers
 		hidden -> setParameter(W1, graph_feature);
