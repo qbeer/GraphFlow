@@ -2,6 +2,10 @@ language: cpp
 compiler:
   - gcc
 
+branches:
+  only:
+  - master
+
 sudo: enabled
 
 matrix:
