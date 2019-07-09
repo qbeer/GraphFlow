@@ -28,10 +28,10 @@ const int nLevels = 4;
 const int nFeatures = 5;
 const int nDepth = 5;
 
-const int nThreads = 2;
+const int nThreads = 8;
 
 const float learning_rate = 0.001;
-const int nEpochs = 1024;
+const int nEpochs = 2;
 
 const int targetSize = 1461;
 
