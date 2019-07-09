@@ -22,22 +22,24 @@
 
 using namespace std;
 
+const bool useCoulomb = true;
 const int max_nVertices = 29;
 const int nChanels = 5;
 const int nLevels = 4;
 const int nFeatures = 5;
+const int nDepth = 5;
 
 const int targetSize = 1461;
 
-const int nThreads = 12;
+const int nThreads = 6;
 
 const double learning_rate = 5e-5;
 const int nEpochs = 50;
 
 string model_fn = "SMP_beta_gpu_multistreams.dat";
 
-SMP_beta_gpu_multistreams train_network(max_nVertices, nLevels, nChanels, nFeatures, true);
-SMP_beta_gpu_multistreams test_network(max_nVertices, nLevels, nChanels, nFeatures, true);
+SMP_beta_gpu_multistreams train_network(useCoulomb, max_nVertices, nLevels, nChanels, nFeatures, nDepth);
+SMP_beta_gpu_multistreams test_network(useCoulomb, max_nVertices, nLevels, nChanels, nFeatures, nDepth);
 
 // Get the millisecond
 void time_ms(long int &ms) {
