@@ -87,18 +87,24 @@ int main(int argc, char **argv) {
 
 	cout << "Multi-threadings" << endl;
 	train_network.init_multi_threads(nThreads);
+	cout << "Initialized multi-threading.\n";
 
 
 	for (int j = 0; j < nEpochs; ++j) {
-		train_network.Threaded_BatchLearn(nMolecules, graphs, targets, learning_rate);
-
-		train_network.Threaded_Predict(nMolecules, graphs, predict);
-		double totalLoss = 0.;
-		for(int ind = 0; ind < nMolecules; ++ind){
-			double loss = train_network.getLoss(nMolecules, graphs, targets[ind]);
-			totalLoss += loss;
+		for (int batch = 0; batch < 10; ++batch){
+			DenseGraph** _graphs = new DenseGraph*[100];
+			double** _targets = new double*[100];
+			for(int ind = 0; ind < 100; ++ind){
+				_graphs[ind] = graphs[batch * 100 + ind];
+				_targets[ind] = targets[batch * 100 + ind];
+			}
+			train_network.Threaded_BatchLearn(100, _graphs, _targets, learning_rate);
+			double totalLoss = train_network.getLoss(100, _graphs, _targets);
+			cout << "Done epoch " << j + 1 << "/" << nEpochs << "  ||  Batch #" << batch + 1 << "\tLoss : " << totalLoss << "\n";
 		}
-		cout << "Done epoch " << j + 1 << " / " << nEpochs << "\tLoss : " << totalLoss << endl;
+
+		double totalLoss = train_network.getLoss(nMolecules, graphs, targets);
+		cout << "\tDone epoch " << j + 1 << " / " << nEpochs << "->\tAverage loss per molecule : " << totalLoss / nMolecules << endl;
 	}
 
 	// Save model to file
