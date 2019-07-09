@@ -31,7 +31,7 @@ std::vector<std::pair<std::string, std::string>> MoleculeBuilder::readMoleculesF
     std::vector<std::string> labelPaths;
 
     std::string bondsDirPath = "../kaggle_utils/molecules/bonds/";
-    std::string labelsDirPath = "../kaggle_utils/molecules/labels/";
+    std::string labelsDirPath = "../kaggle_utils/molecules/labels_potential/";
 
     DIR *dir;
     struct dirent *ent;

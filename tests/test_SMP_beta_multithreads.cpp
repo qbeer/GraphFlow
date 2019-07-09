@@ -31,7 +31,7 @@ const int nDepth = 5;
 
 const int nThreads = 2;
 
-const float learning_rate = 0.001;
+const float learning_rate = 0.01;
 const int nEpochs = 100;
 
 string model_fn = "SMP_beta-model.dat";
