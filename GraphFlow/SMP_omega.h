@@ -692,11 +692,11 @@ public:
 		graph -> add(sql, SQUAREDLOSS);
 	}
 
-	double getLoss(int nBatch, DenseGraph **molecule, double *target) {
+	double getLoss(int nBatch, DenseGraph **molecule, double **target) {
 		double total_loss = 0.0;
 		for (int i = 0; i < nBatch; ++i) {
 			complete_computation_graph(molecule[i]);
-			this -> target -> value[0] = target[i];
+			this -> target -> value = target[i];
 			graph -> forward();
 			total_loss += sql -> getLoss();
 		}
@@ -739,15 +739,15 @@ public:
 		}
 	}
 
-	static void compute_gradient_job(SMP_omega *instance, DenseGraph *molecule, double target) {
+	static void compute_gradient_job(SMP_omega *instance, DenseGraph *molecule, double *target) {
 		instance -> complete_computation_graph(molecule);
-		instance -> target -> value[0] = target;
+		instance -> target -> value = target;
 
 		instance -> graph -> forward();
 		instance -> graph -> backward();
 	}
 
-	void Threaded_BatchLearn(int nBatch, DenseGraph **molecule, double *target, double learning_rate) {
+	void Threaded_BatchLearn(int nBatch, DenseGraph **molecule, double **target, double learning_rate) {
 		assert(multi_threaded == true);
 		assert(nThreads > 1);
 
@@ -795,7 +795,7 @@ public:
 	// | Multi-threading (End) |
 	// +-----------------------+
 
-	pair < double, double > BatchLearn(int nBatch, DenseGraph **molecule, double *target, double learning_rate) {
+	pair < double, double > BatchLearn(int nBatch, DenseGraph **molecule, double **target, double learning_rate) {
 		assert(nBatch > 0);
 		for (int i = 0; i < nBatch; ++i) {
 			assert(molecule[i] -> nVertices <= max_nVertices);
@@ -809,7 +809,7 @@ public:
 
 		for (int i = 0; i < nBatch; ++i) {
 			complete_computation_graph(molecule[i]);
-			this -> target -> value[0] = target[i];
+			this -> target -> value = target[i];
 
 			graph -> forward();
 			graph -> backward();
@@ -824,7 +824,7 @@ public:
 		return ret;
 	}
 
-	pair < double, double > BatchLearn(int nBatch, DenseGraph **molecule, double *target, int nIterations, double learning_rate, double epsilon) {
+	pair < double, double > BatchLearn(int nBatch, DenseGraph **molecule, double **target, int nIterations, double learning_rate, double epsilon) {
 		assert(nBatch > 0);
 		for (int i = 0; i < nBatch; ++i) {
 			assert(molecule[i] -> nVertices <= max_nVertices);
@@ -845,7 +845,7 @@ public:
 
 			for (int i = 0; i < nBatch; ++i) {
 				complete_computation_graph(molecule[i]);
-				this -> target -> value[0] = target[i];
+				this -> target -> value = target[i];
 
 				graph -> forward();
 				graph -> backward();
@@ -873,12 +873,12 @@ public:
 		return ret;
 	}
 
-	pair < double, double > Learn(DenseGraph *molecule, double target, int nIterations, double learning_rate, double epsilon) {
+	pair < double, double > Learn(DenseGraph *molecule, double* target, int nIterations, double learning_rate, double epsilon) {
 		assert(molecule -> nVertices <= max_nVertices);
 		assert(molecule -> nFeatures == nFeatures);
 
 		complete_computation_graph(molecule);
-		this -> target -> value[0] = target;
+		this -> target -> value = target;
 
 		cache_parameters -> cache_parameters();
 
@@ -921,14 +921,14 @@ public:
 		return ret;
 	}
 
-	double Predict(DenseGraph *molecule) {
+	double* Predict(DenseGraph *molecule) {
 		assert(molecule -> nVertices <= max_nVertices);
 
 		complete_computation_graph(molecule);
 
 		graph -> forward();
 
-		return predict -> value[0];
+		return predict -> value;
 	}
 
 	// +------------------------+
